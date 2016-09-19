@@ -347,14 +347,17 @@
 
 // @section extruder
 
-//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
-//can be software-disabled for whatever purposes by
-#define PREVENT_DANGEROUS_EXTRUDE
-//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
-#define PREVENT_LENGTHY_EXTRUDE
-
+// This option prevents extrusion if the temperature is below EXTRUDE_MINTEMP.
+// It also enables the M302 command to set the minimum extrusion temperature
+// or to allow moving the extruder regardless of the hotend temperature.
+// *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
+#define PREVENT_COLD_EXTRUSION
 #define EXTRUDE_MINTEMP 170
-#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
+
+// This option prevents a single extrusion longer than EXTRUDE_MAXLENGTH.
+// Note that for Bowden Extruders a too-small value here may prevent loading.
+#define PREVENT_LENGTHY_EXTRUDE
+#define EXTRUDE_MAXLENGTH 200
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -470,9 +473,69 @@
 #define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING true  // set to true to invert the logic of the endstop.
 
+
+//=============================================================================
+//============================== Movement Settings ============================
+//=============================================================================
+// @section motion
+
+// delta speeds must be the same on xyz
+/**
+ * Default Settings
+ *
+ * These settings can be reset by M502
+ *
+ * Note that if EEPROM is enabled, saved values will override these.
+ */
+
+/**
+ * Default Axis Steps Per Unit (steps/mm)
+ * Override with M92
+ */
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 72.9, 72.9, 72.9, 291 }  // default steps per unit for BI v2.5 (cable drive)
+
+/**
+ * Default Max Feed Rate (mm/s)
+ * Override with M203
+ */
+#define DEFAULT_MAX_FEEDRATE          { 500, 500, 500, 150 }
+
+/**
+ * Default Max Acceleration (change/s) change = mm/s
+ * Override with M201
+ *
+ * Maximum start speed for accelerated moves: { X, Y, Z, E }
+ */
+#define DEFAULT_MAX_ACCELERATION      { 9000, 9000, 9000, 10000 }
+
+/**
+ * Default Acceleration (change/s) change = mm/s
+ * Override with M204
+ *
+ *   M204 P    Acceleration
+ *   M204 R    Retract Acceleration
+ *   M204 T    Travel Acceleration
+ */
+#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
+
+/**
+ * Defult Jerk (mm/s)
+ *
+ * "Jerk" specifies the minimum speed change that requires acceleration.
+ * When changing speed and direction, if the difference is less than the
+ * value set here, it may happen instantaneously.
+ */
+#define DEFAULT_XYJERK                15.0
+#define DEFAULT_ZJERK                 15.0 // Must be same as XY for delta
+#define DEFAULT_EJERK                  5.0
+
+
 //===========================================================================
 //============================= Z Probe Options =============================
 //===========================================================================
+// @section probes
 
 //
 // Probe Type
@@ -491,6 +554,7 @@
 //#define FIX_MOUNTED_PROBE
 
 // The BLTouch probe emulates a servo probe.
+// The default connector is SERVO 0. Set Z_ENDSTOP_SERVO_NR below to override.
 //#define BLTOUCH
 
 // Z Servo Probe, such as an endstop switch on a rotating arm.
@@ -630,10 +694,11 @@
 //#define Z_MIN_PROBE_REPEATABILITY_TEST
 
 //
-// Probe Raise options provide clearance for the probe to deploy, stow, and travel.
+// Minimum heights for the probe to deploy/stow and travel.
+// These values specify the distance from the NOZZLE to the BED.
 //
-#define Z_PROBE_DEPLOY_HEIGHT 50 // Raise to make room for the probe to deploy / stow
-#define Z_PROBE_TRAVEL_HEIGHT 5  // Raise between probing points.
+#define Z_PROBE_DEPLOY_HEIGHT 50 // Z position for the probe to deploy/stow
+#define Z_PROBE_TRAVEL_HEIGHT  5 // Z position for travel between points
 
 //
 // For M851 give a range for adjusting the Z probe offset
@@ -705,7 +770,7 @@
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
-                                 // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
+                                 // RAMPS-based boards use SERVO3_PIN. For other boards you may need to define FIL_RUNOUT_PIN.
                                  // It is assumed that when logic high = filament available
                                  //                    when logic  low = filament ran out
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -780,8 +845,9 @@
     // Non-linear bed leveling will be used.
     // Compensate by interpolating between the nearest four Z probe values for each point.
     // Useful for deltas where the print surface may appear like a bowl or dome shape.
-    // Works best with AUTO_BED_LEVELING_GRID_POINTS 5 or higher.
-    #define AUTO_BED_LEVELING_GRID_POINTS 9
+    // Works best with 5 or more points in each dimension.
+    #define ABL_GRID_POINTS_X 9
+    #define ABL_GRID_POINTS_Y ABL_GRID_POINTS_X
 
   #else  // !AUTO_BED_LEVELING_GRID
 
@@ -834,26 +900,6 @@
 
 // Delta only homes to Z
 #define HOMING_FEEDRATE_Z  (200*30)
-
-//
-// MOVEMENT SETTINGS
-// @section motion
-//
-
-// default settings
-// delta speeds must be the same on xyz
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {72.9, 72.9, 72.9, 291}  // default steps per unit for BI v2.5 (cable drive)
-#define DEFAULT_MAX_FEEDRATE          {500, 500, 500, 150}    // (mm/sec)
-#define DEFAULT_MAX_ACCELERATION      {9000,9000,9000,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
-
-#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration in mm/s^2 for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
-
-// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
-#define DEFAULT_XYJERK                15.0    // (mm/sec)
-#define DEFAULT_ZJERK                 15.0    // (mm/sec) Must be same as XY for delta
-#define DEFAULT_EJERK                 5.0    // (mm/sec)
 
 
 //=============================================================================
