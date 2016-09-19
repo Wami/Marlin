@@ -105,18 +105,15 @@
 //#define SHOW_CUSTOM_BOOTSCREEN
 // @section machine
 
-/**
- * Select which serial port on the board will be used for communication with the host.
- * This allows the connection of wireless adapters (for instance) to non-default port pins.
- * Serial port 0 is always used by the Arduino bootloader regardless of this setting.
- *
- * :[0,1,2,3,4,5,6,7]
- */
+// SERIAL_PORT selects which serial port should be used for communication with the host.
+// This allows the connection of wireless adapters (for instance) to non-default port pins.
+// Serial port 0 is still used by the Arduino bootloader regardless of this setting.
+// :[0,1,2,3,4,5,6,7]
 #define SERIAL_PORT 0
 
 // This determines the communication speed of the printer
 // :[2400,9600,19200,38400,57600,115200,250000]
-#define BAUDRATE 115200
+#define BAUDRATE 250000
 
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
@@ -232,7 +229,7 @@
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 1
+#define TEMP_SENSOR_BED 0
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
 //#define TEMP_SENSOR_1_AS_REDUNDANT
@@ -260,11 +257,11 @@
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define HEATER_0_MAXTEMP 280
-#define HEATER_1_MAXTEMP 280
-#define HEATER_2_MAXTEMP 280
-#define HEATER_3_MAXTEMP 280
-#define BED_MAXTEMP 180
+#define HEATER_0_MAXTEMP 275
+#define HEATER_1_MAXTEMP 275
+#define HEATER_2_MAXTEMP 275
+#define HEATER_3_MAXTEMP 275
+#define BED_MAXTEMP 150
 
 //===========================================================================
 //============================= PID Settings ================================
@@ -289,9 +286,9 @@
 
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
   // Ultimaker
-  #define  DEFAULT_Kp 25.46
-  #define  DEFAULT_Ki 2.11
-  #define  DEFAULT_Kd 76.98
+  #define  DEFAULT_Kp 22.2
+  #define  DEFAULT_Ki 1.08
+  #define  DEFAULT_Kd 114
 
   // MakerGear
   //#define  DEFAULT_Kp 7.0
@@ -350,17 +347,14 @@
 
 // @section extruder
 
-// This option prevents extrusion if the temperature is below EXTRUDE_MINTEMP.
-// It also enables the M302 command to set the minimum extrusion temperature
-// or to allow moving the extruder regardless of the hotend temperature.
-// *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
-#define PREVENT_COLD_EXTRUSION
-#define EXTRUDE_MINTEMP 170
-
-// This option prevents a single extrusion longer than EXTRUDE_MAXLENGTH.
-// Note that for Bowden Extruders a too-small value here may prevent loading.
+//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
+//can be software-disabled for whatever purposes by
+#define PREVENT_DANGEROUS_EXTRUDE
+//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
 #define PREVENT_LENGTHY_EXTRUDE
-#define EXTRUDE_MAXLENGTH 200
+
+#define EXTRUDE_MINTEMP 170
+#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -426,75 +420,17 @@
 #endif
 
 // Mechanical endstop with COM to ground and NC to Signal uses "false" here (most common setup).
-#define X_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-#define Y_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-#define Z_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-#define X_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-#define Y_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-#define Z_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-#define Z_MIN_PROBE_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
-
-//=============================================================================
-//============================== Movement Settings ============================
-//=============================================================================
-// @section motion
-
-/**
- * Default Settings
- *
- * These settings can be reset by M502
- *
- * Note that if EEPROM is enabled, saved values will override these.
- */
-
-/**
- * Default Axis Steps Per Unit (steps/mm)
- * Override with M92
- */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.26, 97.4, 400*1.014, 97.5} 
-
-/**
- * Default Max Feed Rate (mm/s)
- * Override with M203
- */
-#define DEFAULT_MAX_FEEDRATE          { 200, 200, 5, 25 }
-
-/**
- * Default Max Acceleration (change/s) change = mm/s
- * Override with M201
- *
- * Maximum start speed for accelerated moves: { X, Y, Z, E }
- */
-#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 90, 10000 }
-
-/**
- * Default Acceleration (change/s) change = mm/s
- * Override with M204
- *
- *   M204 P    Acceleration
- *   M204 R    Retract Acceleration
- *   M204 T    Travel Acceleration
- */
-#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  2000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration for travel (non printing) moves
-
-/**
- * Defult Jerk (mm/s)
- *
- * "Jerk" specifies the minimum speed change that requires acceleration.
- * When changing speed and direction, if the difference is less than the
- * value set here, it may happen instantaneously.
- */
-#define DEFAULT_XYJERK                20.0
-#define DEFAULT_ZJERK                  0.4
-#define DEFAULT_EJERK                  5.0
-
+#define X_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define Y_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define X_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+#define Z_MIN_PROBE_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 
 //===========================================================================
 //============================= Z Probe Options =============================
 //===========================================================================
-// @section probes
 
 //
 // Probe Type
@@ -510,10 +446,9 @@
 // For example an inductive probe, or a setup that uses the nozzle to probe.
 // An inductive probe must be deactivated to go below
 // its trigger-point if hardware endstops are active.
-#define FIX_MOUNTED_PROBE
+//#define FIX_MOUNTED_PROBE
 
 // The BLTouch probe emulates a servo probe.
-// The default connector is SERVO 0. Set Z_ENDSTOP_SERVO_NR below to override.
 //#define BLTOUCH
 
 // Z Servo Probe, such as an endstop switch on a rotating arm.
@@ -541,8 +476,8 @@
 //    |           |
 //    O-- FRONT --+
 //  (0,0)
-#define X_PROBE_OFFSET_FROM_EXTRUDER -36  // X offset: -left  +right  [of the nozzle]
-#define Y_PROBE_OFFSET_FROM_EXTRUDER -17  // Y offset: -front +behind [the nozzle]
+#define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
+#define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
 #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
 
 // X and Y axis travel speed (mm/m) between probes
@@ -603,13 +538,12 @@
 //#define DISABLE_Z_MIN_PROBE_ENDSTOP
 
 // Enable Z Probe Repeatability test to see how accurate your probe is
-#define Z_MIN_PROBE_REPEATABILITY_TEST
+//#define Z_MIN_PROBE_REPEATABILITY_TEST
 
 //
-// Minimum heights for the probe to deploy/stow and travel.
-// These values specify the distance from the NOZZLE to the BED.
+// Probe Raise options provide clearance for the probe to deploy, stow, and travel.
 //
-#define Z_PROBE_DEPLOY_HEIGHT 10 // Raise to make room for the probe to deploy / stow
+#define Z_PROBE_DEPLOY_HEIGHT 15 // Raise to make room for the probe to deploy / stow
 #define Z_PROBE_TRAVEL_HEIGHT 5  // Raise between probing points.
 
 //
@@ -641,9 +575,9 @@
 // @section machine
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
-#define INVERT_X_DIR true
+#define INVERT_X_DIR false
 #define INVERT_Y_DIR true
-#define INVERT_Z_DIR true
+#define INVERT_Z_DIR false
 
 // @section extruder
 
@@ -674,15 +608,15 @@
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 195
-#define Y_MAX_POS 195
-#define Z_MAX_POS 180
+#define X_MAX_POS 200
+#define Y_MAX_POS 200
+#define Z_MAX_POS 200
 
 //===========================================================================
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
-                                 // RAMPS-based boards use SERVO3_PIN. For other boards you may need to define FIL_RUNOUT_PIN.
+                                 // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
                                  // It is assumed that when logic high = filament available
                                  //                    when logic  low = filament ran out
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -719,7 +653,7 @@
 
 // @section bedlevel
 
-#define AUTO_BED_LEVELING_FEATURE // Delete the comment to enable (remove // at the start of the line)
+//#define AUTO_BED_LEVELING_FEATURE // Delete the comment to enable (remove // at the start of the line)
 
 // Enable this feature to get detailed logging of G28, G29, M48, etc.
 // Logging is off by default. Enable this logging feature with 'M111 S32'.
@@ -745,28 +679,27 @@
 
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 
-    #define LEFT_PROBE_BED_POSITION 20
-    #define RIGHT_PROBE_BED_POSITION 150
+    #define LEFT_PROBE_BED_POSITION 15
+    #define RIGHT_PROBE_BED_POSITION 170
     #define FRONT_PROBE_BED_POSITION 20
-    #define BACK_PROBE_BED_POSITION 160
+    #define BACK_PROBE_BED_POSITION 170
 
     #define MIN_PROBE_EDGE 10 // The Z probe minimum square sides can be no smaller than this.
 
     // Set the number of grid points per dimension.
     // You probably don't need more than 3 (squared=9).
-    #define ABL_GRID_POINTS_X 3
-    #define ABL_GRID_POINTS_Y ABL_GRID_POINTS_X
+    #define AUTO_BED_LEVELING_GRID_POINTS 2
 
   #else  // !AUTO_BED_LEVELING_GRID
 
     // Arbitrary points to probe.
     // A simple cross-product is used to estimate the plane of the bed.
-    #define ABL_PROBE_PT_1_X 13
-    #define ABL_PROBE_PT_1_Y -10
-    #define ABL_PROBE_PT_2_X 153
-    #define ABL_PROBE_PT_2_Y -10
-    #define ABL_PROBE_PT_3_X 0
-    #define ABL_PROBE_PT_3_Y 174
+    #define ABL_PROBE_PT_1_X 15
+    #define ABL_PROBE_PT_1_Y 180
+    #define ABL_PROBE_PT_2_X 15
+    #define ABL_PROBE_PT_2_Y 20
+    #define ABL_PROBE_PT_3_X 170
+    #define ABL_PROBE_PT_3_Y 20
 
   #endif // !AUTO_BED_LEVELING_GRID
 
@@ -798,7 +731,7 @@
 // - If stepper drivers time out, it will need X and Y homing again before Z homing.
 // - Move the Z probe (or nozzle) to a defined XY point before Z Homing when homing all axes (G28).
 // - Prevent Z homing when the Z probe is outside bed area.
-#define Z_SAFE_HOMING
+//#define Z_SAFE_HOMING
 
 #if ENABLED(Z_SAFE_HOMING)
   #define Z_SAFE_HOMING_X_POINT ((X_MIN_POS + X_MAX_POS) / 2)    // X point for Z homing when homing all axis (G28).
@@ -808,6 +741,27 @@
 // Homing speeds (mm/m)
 #define HOMING_FEEDRATE_XY (50*60)
 #define HOMING_FEEDRATE_Z  (4*60)
+
+//
+// MOVEMENT SETTINGS
+// @section motion
+//
+
+// default settings
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {80,80,4000,500}  // default steps per unit for Ultimaker
+#define DEFAULT_MAX_FEEDRATE          {300, 300, 5, 25}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {3000,3000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
+
+#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration in mm/s^2 for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+
+// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
+#define DEFAULT_XYJERK                20.0    // (mm/sec)
+#define DEFAULT_ZJERK                 0.4     // (mm/sec)
+#define DEFAULT_EJERK                 5.0    // (mm/sec)
+
 
 //=============================================================================
 //============================= Additional Features ===========================
@@ -857,12 +811,12 @@
 // @section temperature
 
 // Preheat Constants
-#define PREHEAT_1_TEMP_HOTEND 190
-#define PREHEAT_1_TEMP_BED     50
+#define PREHEAT_1_TEMP_HOTEND 180
+#define PREHEAT_1_TEMP_BED     70
 #define PREHEAT_1_FAN_SPEED     0 // Value from 0 to 255
 
 #define PREHEAT_2_TEMP_HOTEND 240
-#define PREHEAT_2_TEMP_BED    120
+#define PREHEAT_2_TEMP_BED    110
 #define PREHEAT_2_FAN_SPEED     0 // Value from 0 to 255
 
 //
@@ -1006,7 +960,7 @@
 //
 // :['JAPANESE','WESTERN','CYRILLIC']
 //
-#define DISPLAY_CHARSET_HD44780 CYRILLIC
+#define DISPLAY_CHARSET_HD44780 JAPANESE
 
 //
 // LCD TYPE
@@ -1171,7 +1125,7 @@
 //
 // Note: Usually sold with a white PCB.
 //
-#define REPRAP_DISCOUNT_SMART_CONTROLLER
+//#define REPRAP_DISCOUNT_SMART_CONTROLLER
 
 //
 // GADGETS3D G3D LCD/SD Controller

@@ -105,13 +105,10 @@
 //#define SHOW_CUSTOM_BOOTSCREEN
 // @section machine
 
-/**
- * Select which serial port on the board will be used for communication with the host.
- * This allows the connection of wireless adapters (for instance) to non-default port pins.
- * Serial port 0 is always used by the Arduino bootloader regardless of this setting.
- *
- * :[0,1,2,3,4,5,6,7]
- */
+// SERIAL_PORT selects which serial port should be used for communication with the host.
+// This allows the connection of wireless adapters (for instance) to non-default port pins.
+// Serial port 0 is still used by the Arduino bootloader regardless of this setting.
+// :[0,1,2,3,4,5,6,7]
 #define SERIAL_PORT 0
 
 // This determines the communication speed of the printer
@@ -350,17 +347,14 @@
 
 // @section extruder
 
-// This option prevents extrusion if the temperature is below EXTRUDE_MINTEMP.
-// It also enables the M302 command to set the minimum extrusion temperature
-// or to allow moving the extruder regardless of the hotend temperature.
-// *** IT IS HIGHLY RECOMMENDED TO LEAVE THIS OPTION ENABLED! ***
-#define PREVENT_COLD_EXTRUSION
-#define EXTRUDE_MINTEMP 170
-
-// This option prevents a single extrusion longer than EXTRUDE_MAXLENGTH.
-// Note that for Bowden Extruders a too-small value here may prevent loading.
+//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
+//can be software-disabled for whatever purposes by
+#define PREVENT_DANGEROUS_EXTRUDE
+//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
 #define PREVENT_LENGTHY_EXTRUDE
-#define EXTRUDE_MAXLENGTH 200
+
+#define EXTRUDE_MINTEMP 150
+#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -434,67 +428,9 @@
 #define Z_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 
-//=============================================================================
-//============================== Movement Settings ============================
-//=============================================================================
-// @section motion
-
-/**
- * Default Settings
- *
- * These settings can be reset by M502
- *
- * Note that if EEPROM is enabled, saved values will override these.
- */
-
-/**
- * Default Axis Steps Per Unit (steps/mm)
- * Override with M92
- */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.26, 97.4, 400*1.014, 97.5} 
-
-/**
- * Default Max Feed Rate (mm/s)
- * Override with M203
- */
-#define DEFAULT_MAX_FEEDRATE          { 200, 200, 5, 25 }
-
-/**
- * Default Max Acceleration (change/s) change = mm/s
- * Override with M201
- *
- * Maximum start speed for accelerated moves: { X, Y, Z, E }
- */
-#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 90, 10000 }
-
-/**
- * Default Acceleration (change/s) change = mm/s
- * Override with M204
- *
- *   M204 P    Acceleration
- *   M204 R    Retract Acceleration
- *   M204 T    Travel Acceleration
- */
-#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  2000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration for travel (non printing) moves
-
-/**
- * Defult Jerk (mm/s)
- *
- * "Jerk" specifies the minimum speed change that requires acceleration.
- * When changing speed and direction, if the difference is less than the
- * value set here, it may happen instantaneously.
- */
-#define DEFAULT_XYJERK                20.0
-#define DEFAULT_ZJERK                  0.4
-#define DEFAULT_EJERK                  5.0
-
-
 //===========================================================================
 //============================= Z Probe Options =============================
 //===========================================================================
-// @section probes
 
 //
 // Probe Type
@@ -513,7 +449,6 @@
 #define FIX_MOUNTED_PROBE
 
 // The BLTouch probe emulates a servo probe.
-// The default connector is SERVO 0. Set Z_ENDSTOP_SERVO_NR below to override.
 //#define BLTOUCH
 
 // Z Servo Probe, such as an endstop switch on a rotating arm.
@@ -606,10 +541,9 @@
 #define Z_MIN_PROBE_REPEATABILITY_TEST
 
 //
-// Minimum heights for the probe to deploy/stow and travel.
-// These values specify the distance from the NOZZLE to the BED.
+// Probe Raise options provide clearance for the probe to deploy, stow, and travel.
 //
-#define Z_PROBE_DEPLOY_HEIGHT 10 // Raise to make room for the probe to deploy / stow
+#define Z_PROBE_DEPLOY_HEIGHT 5 // Raise to make room for the probe to deploy / stow
 #define Z_PROBE_TRAVEL_HEIGHT 5  // Raise between probing points.
 
 //
@@ -682,7 +616,7 @@
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
-                                 // RAMPS-based boards use SERVO3_PIN. For other boards you may need to define FIL_RUNOUT_PIN.
+                                 // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
                                  // It is assumed that when logic high = filament available
                                  //                    when logic  low = filament ran out
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -754,8 +688,7 @@
 
     // Set the number of grid points per dimension.
     // You probably don't need more than 3 (squared=9).
-    #define ABL_GRID_POINTS_X 3
-    #define ABL_GRID_POINTS_Y ABL_GRID_POINTS_X
+    #define AUTO_BED_LEVELING_GRID_POINTS 2
 
   #else  // !AUTO_BED_LEVELING_GRID
 
@@ -809,6 +742,27 @@
 #define HOMING_FEEDRATE_XY (50*60)
 #define HOMING_FEEDRATE_Z  (4*60)
 
+//
+// MOVEMENT SETTINGS
+// @section motion
+//
+
+// default settings
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.26, 97.4, 400*1.014, 97.5}  // default steps per unit for Ultimaker
+#define DEFAULT_MAX_FEEDRATE          {200, 200, 5, 30}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {2000,2000,90,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
+
+#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  2000    // E acceleration in mm/s^2 for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+
+// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
+#define DEFAULT_XYJERK                20.0    // (mm/sec)
+#define DEFAULT_ZJERK                 0.4     // (mm/sec)
+#define DEFAULT_EJERK                 5.0    // (mm/sec)
+
+
 //=============================================================================
 //============================= Additional Features ===========================
 //=============================================================================
@@ -836,8 +790,8 @@
 // When enabled Marlin will send a busy status message to the host
 // every couple of seconds when it can't accept commands.
 //
-#define HOST_KEEPALIVE_FEATURE        // Disable this if your host doesn't like keepalive messages
-#define DEFAULT_KEEPALIVE_INTERVAL 2  // Number of seconds between "busy" messages. Set with M113.
+//#define HOST_KEEPALIVE_FEATURE        // Disable this if your host doesn't like keepalive messages
+//#define DEFAULT_KEEPALIVE_INTERVAL 2  // Number of seconds between "busy" messages. Set with M113.
 
 //
 // M100 Free Memory Watcher
@@ -890,7 +844,7 @@
 #endif
 
 //
-// Clean Nozzle Feature -- EXPERIMENTAL
+//  Feature -- EXPERIMENTAL
 //
 // When enabled allows the user to send G12 to start the nozzle cleaning
 // process, the G-Code accepts two parameters:

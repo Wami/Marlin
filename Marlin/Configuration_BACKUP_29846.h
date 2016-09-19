@@ -114,9 +114,21 @@
  */
 #define SERIAL_PORT 0
 
+<<<<<<< HEAD
 // This determines the communication speed of the printer
 // :[2400,9600,19200,38400,57600,115200,250000]
 #define BAUDRATE 115200
+=======
+#define BAUDRATE 250000
+/**
+ * This setting determines the communication speed of the printer.
+ *
+ * 250000 works in most cases, but you might try a lower speed if
+ * you commonly experience drop-outs during host printing.
+ *
+ * :[2400,9600,19200,38400,57600,115200,250000]
+ */
+>>>>>>> upstream/RCBugFix
 
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
@@ -172,14 +184,22 @@
 //#define HOTEND_OFFSET_X {0.0, 20.00} // (in mm) for each extruder, offset of the hotend on the X axis
 //#define HOTEND_OFFSET_Y {0.0, 5.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
-//// The following define selects which power supply you have. Please choose the one that matches your setup
-// 1 = ATX
-// 2 = X-Box 360 203Watts (the blue wire connected to PS_ON and the red wire to VCC)
-// :{1:'ATX',2:'X-Box 360'}
-#define POWER_SUPPLY 1
+/**
+ * Select your power supply here. Use 0 if you haven't connected the PS_ON_PIN
+ *
+ * 0 = No Power Switch
+ * 1 = ATX
+ * 2 = X-Box 360 203Watts (the blue wire connected to PS_ON and the red wire to VCC)
+ *
+ * :{0:'No power switch',1:'ATX',2:'X-Box 360'}
+ */
+#define POWER_SUPPLY 0
 
-// Define this to have the electronics keep the power supply off on startup. If you don't know what this is leave it.
-//#define PS_DEFAULT_OFF
+#if POWER_SUPPLY > 0
+  // Enable this option to leave the PSU off at startup.
+  // Power to steppers and heaters will need to be turned on with M80.
+  //#define PS_DEFAULT_OFF
+#endif
 
 // @section temperature
 
@@ -350,6 +370,16 @@
 
 // @section extruder
 
+<<<<<<< HEAD
+//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
+//can be software-disabled for whatever purposes by
+#define PREVENT_DANGEROUS_EXTRUDE
+//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
+#define PREVENT_LENGTHY_EXTRUDE
+
+#define EXTRUDE_MINTEMP 150
+#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
+=======
 // This option prevents extrusion if the temperature is below EXTRUDE_MINTEMP.
 // It also enables the M302 command to set the minimum extrusion temperature
 // or to allow moving the extruder regardless of the hotend temperature.
@@ -361,6 +391,7 @@
 // Note that for Bowden Extruders a too-small value here may prevent loading.
 #define PREVENT_LENGTHY_EXTRUDE
 #define EXTRUDE_MAXLENGTH 200
+>>>>>>> upstream/RCBugFix
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -434,6 +465,7 @@
 #define Z_MAX_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 #define Z_MIN_PROBE_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
 
+
 //=============================================================================
 //============================== Movement Settings ============================
 //=============================================================================
@@ -451,13 +483,13 @@
  * Default Axis Steps Per Unit (steps/mm)
  * Override with M92
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.26, 97.4, 400*1.014, 97.5} 
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  */
-#define DEFAULT_MAX_FEEDRATE          { 200, 200, 5, 25 }
+#define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
 
 /**
  * Default Max Acceleration (change/s) change = mm/s
@@ -465,7 +497,7 @@
  *
  * Maximum start speed for accelerated moves: { X, Y, Z, E }
  */
-#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 90, 10000 }
+#define DEFAULT_MAX_ACCELERATION      { 3000, 3000, 100, 10000 }
 
 /**
  * Default Acceleration (change/s) change = mm/s
@@ -475,9 +507,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  2000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Defult Jerk (mm/s)
@@ -609,8 +641,13 @@
 // Minimum heights for the probe to deploy/stow and travel.
 // These values specify the distance from the NOZZLE to the BED.
 //
-#define Z_PROBE_DEPLOY_HEIGHT 10 // Raise to make room for the probe to deploy / stow
+<<<<<<< HEAD
+#define Z_PROBE_DEPLOY_HEIGHT 5 // Raise to make room for the probe to deploy / stow
 #define Z_PROBE_TRAVEL_HEIGHT 5  // Raise between probing points.
+=======
+#define Z_PROBE_DEPLOY_HEIGHT 15 // Z position for the probe to deploy/stow
+#define Z_PROBE_TRAVEL_HEIGHT  5 // Z position for travel between points
+>>>>>>> upstream/RCBugFix
 
 //
 // For M851 give a range for adjusting the Z probe offset
@@ -809,6 +846,30 @@
 #define HOMING_FEEDRATE_XY (50*60)
 #define HOMING_FEEDRATE_Z  (4*60)
 
+<<<<<<< HEAD
+//
+// MOVEMENT SETTINGS
+// @section motion
+//
+
+// default settings
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.26, 97.4, 400*1.014, 97.5}  // default steps per unit for Ultimaker
+#define DEFAULT_MAX_FEEDRATE          {200, 200, 5, 30}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {2000,2000,90,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
+
+#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  2000    // E acceleration in mm/s^2 for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+
+// The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
+#define DEFAULT_XYJERK                20.0    // (mm/sec)
+#define DEFAULT_ZJERK                 0.4     // (mm/sec)
+#define DEFAULT_EJERK                 5.0    // (mm/sec)
+
+
+=======
+>>>>>>> upstream/RCBugFix
 //=============================================================================
 //============================= Additional Features ===========================
 //=============================================================================
@@ -836,8 +897,8 @@
 // When enabled Marlin will send a busy status message to the host
 // every couple of seconds when it can't accept commands.
 //
-#define HOST_KEEPALIVE_FEATURE        // Disable this if your host doesn't like keepalive messages
-#define DEFAULT_KEEPALIVE_INTERVAL 2  // Number of seconds between "busy" messages. Set with M113.
+//#define HOST_KEEPALIVE_FEATURE        // Disable this if your host doesn't like keepalive messages
+//#define DEFAULT_KEEPALIVE_INTERVAL 2  // Number of seconds between "busy" messages. Set with M113.
 
 //
 // M100 Free Memory Watcher
@@ -890,7 +951,7 @@
 #endif
 
 //
-// Clean Nozzle Feature -- EXPERIMENTAL
+//  Feature -- EXPERIMENTAL
 //
 // When enabled allows the user to send G12 to start the nozzle cleaning
 // process, the G-Code accepts two parameters:
